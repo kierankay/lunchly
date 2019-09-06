@@ -12,6 +12,7 @@ class Customer {
     this.lastName = lastName;
     this.phone = phone;
     this.notes = notes;
+    this.fullName = this.fullName()
   }
 
   /** find all customers. */
@@ -53,11 +54,50 @@ class Customer {
     return new Customer(customer);
   }
 
+  /** get a customer by name. */
+
+  static async getByFullName(name) {
+    const results = await db.query(
+      `SELECT id, 
+        first_name AS "firstName",  
+        last_name AS "lastName", 
+        phone, 
+        notes
+        FROM customers WHERE
+        $1 iLIKE CONCAT('%',first_name,'%')
+        or $1 iLIKE CONCAT('%',last_name,'%')
+        or first_name iLIKE CONCAT('%',$1,'%')
+        or last_name iLIKE CONCAT('%',$1,'%')`,
+      [name]
+    );
+    return results.rows.map(c => new Customer(c));
+  }
+
   /** get all reservations for this customer. */
 
   async getReservations() {
     return await Reservation.getReservationsForCustomer(this.id);
   }
+
+    /** get top 10 customers. */
+
+    static async getBestCustomers() {
+      const customers = await db.query(`
+      SELECT customers.id, 
+        first_name AS "firstName",  
+        last_name AS "lastName", 
+        customers.phone, 
+        customers.notes,
+        COUNT(customers.id)
+        FROM customers
+        LEFT JOIN reservations
+        ON customers.id = reservations.customer_id
+        GROUP BY customers.id
+        ORDER BY COUNT(customers.id) DESC
+        LIMIT 10
+      `)
+      return customers.rows.map(c => new Customer(c));
+    }
 
   /** save this customer. */
 
@@ -77,6 +117,11 @@ class Customer {
         [this.firstName, this.lastName, this.phone, this.notes, this.id]
       );
     }
+  }
+
+  fullName() {
+    const fullName = `${this.firstName} ${this.lastName}`
+    return fullName
   }
 }
 

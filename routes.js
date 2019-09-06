@@ -7,6 +7,17 @@ const Reservation = require("./models/reservation");
 
 const router = new express.Router();
 
+router.get("/search-customers/", async function(req, res, next) {
+  try {
+    const name = req.query.customername
+    const customers = await Customer.getByFullName(name)
+    return res.render("customer_list.html", { customers })
+  }
+  catch(err) {
+    return next(err)
+  }
+})
+
 /** Homepage: show list of customers. */
 
 router.get("/", async function(req, res, next) {
@@ -23,6 +34,17 @@ router.get("/", async function(req, res, next) {
 router.get("/add/", async function(req, res, next) {
   try {
     return res.render("customer_new_form.html");
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** Display 10 best customers list */
+
+router.get("/best-customers/", async function(req, res, next) {
+  try {
+    const customers = await Customer.getBestCustomers()
+    return res.render("customer_list.html", { customers })
   } catch (err) {
     return next(err);
   }
@@ -104,7 +126,9 @@ router.post("/:id/add-reservation/", async function(req, res, next) {
       numGuests,
       notes
     });
+    console.log(reservation)
     await reservation.save();
+    console.log(reservation)
 
     return res.redirect(`/${customerId}/`);
   } catch (err) {
