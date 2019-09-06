@@ -11,13 +11,49 @@ class Reservation {
   constructor({id, customerId, numGuests, startAt, notes}) {
     this.id = id;
     this.customerId = customerId;
-    this.numGuests = numGuests;
-    this.startAt = startAt;
+    // this.numGuests = numGuests;
+    this.startAt = Date(startAt);
     this.notes = notes;
+    this.numGuests = numGuests
+    
+    
   }
 
-  /** formatter for startAt */
 
+  set numGuests(numGuests){
+    if(numGuests < 1){
+      throw Error
+    } else {
+      this._numGuests = numGuests
+    }
+  }
+
+  get numGuests(){
+    return this._numGuests
+  }
+
+
+  set startAt(val){
+    if(val instanceof Date){
+      throw Error 
+    } else {
+      this._startAt = new Date(val) 
+    }
+  }
+
+  get startAt(){
+    let newStart = new Date(this._startAt)
+    return newStart
+  }
+
+
+
+
+
+
+
+  /** formatter for startAt */
+  
   getformattedStartAt() {
     return moment(this.startAt).format('MMMM Do YYYY, h:mm a');
   }

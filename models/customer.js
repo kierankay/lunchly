@@ -15,6 +15,12 @@ class Customer {
     this.fullName = this.fullName()
   }
 
+
+  
+
+
+
+
   /** find all customers. */
 
   static async all() {
